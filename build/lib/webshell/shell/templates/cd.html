@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Shell</title>
+	<style>
+	body{
+		background-color: #404040;
+		font-family: Arial;
+		color: white;
+	}
+	a{
+		text-decoration: none;
+		color: #ffffff;
+	}
+	.wrapper_left{
+		width: 60%;
+		float: left;
+	}
+	.wrapper_right{
+		float: right;
+	}
+	.actions{
+		float: right;
+	}
+	.files{
+		background-color: #556B2F;
+		margin-bottom: 3px;
+		margin-top: 3px;
+		padding-left: 3px;
+		padding-top: 3px;
+		padding-bottom: 3px;
+	}
+	.directories{
+		background-color: #238E68;
+		margin-bottom: 3px;
+		margin-top: 3px;
+		padding-left: 3px;
+		padding-top: 3px;
+		padding-bottom: 3px;
+
+	}
+	.directories:hover{
+		opacity: 0.6;
+	}
+	.files:hover{
+		opacity: 0.6;
+	}
+	</style>
+</head>
+
+
+<script language="JavaScript" type="text/javascript">
+function confirmDelete() {
+if (confirm("Really delete this object?")) {
+return true;
+} else {
+return false;
+}
+}
+</script>
+Current dir: 
+<form method="POST" action="{% url "cd"%}">
+  {% csrf_token %}
+  <input type=text name=path value="{{ shell.directory }}">
+  <input type="submit" value=Go>
+</form>
+<div class="wrapper_left">
+<ol>
+  <h2>Directories</h2>
+  {% if shell.directories %}
+  {% for directory in shell.directories %}
+    <li>
+  	  <div class="directories">
+  		<a href="{{full_path|add:"/"|add:directory}}">{{directory}}</a>
+  		<div class="actions">
+  		  <a href="{% url "remove_directory" shell.directory|add:"/"|add:directory%}" onClick="return confirmDelete();"> [Remove] </a>
+  	    </div>
+  	  </div>
+    </li>
+  {% endfor %}
+  {% else %}
+  <font color="red">This directory not has other directories</font>
+  {% endif %}  
+  <h2>Files</h2>
+  {% if shell.files %}
+  {% for file in shell.files %}
+    <li>
+  	  <div class="files">
+  	  	{% if file|length > 69 %}
+  	    {{file|slice:"0:70"|add:"..."}}
+  	    {% else %}
+  	    {{file}}
+  	    {% endif %}
+  		<div class="actions">
+  		  <a href="{% url "remove_file" shell.directory|add:"/"|add:file%}" onClick="return confirmDelete();"> [Remove] </a>
+  		</div>
+  	  </div>
+    </li>
+  {% endfor %}
+  {% else %}
+  <font color="red">This directory not has any files</font>
+  {% endif %}
+</ol>
+</div>
+<div class="wrapper_right">
+  {% include 'new_directory.html' %}
+  {% include 'new_file.html' %}
+</div>
+</html>

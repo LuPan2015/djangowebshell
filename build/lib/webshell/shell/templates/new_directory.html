@@ -1,0 +1,12 @@
+<div class="directories">
+<h2>Create directory here</h2>
+<form method="POST" action="{% url "new_directory" shell.directory %}">
+	{% csrf_token %}
+    <dl>
+    <dt>Name
+	<dd><input type=text size=30 maxlength=100  name=dname>
+	<dt><br/>
+    <dd><input type=submit value=Create>
+    </dl>
+</form>
+</div>

@@ -1,0 +1,14 @@
+<div class="files">
+<h2>Create file here</h2>
+<form method="POST" action="{% url "new_file" shell.directory %}">
+	{% csrf_token %}
+    <dl>
+    <dt>Name
+	<dd><input type=text size=30 maxlength=100  name=fname>
+    <dt>Content
+    <dd><textarea name=fcontent rows=4 cols=24></textarea>
+    <dt><br/>
+    <dd><input type=submit value=Create>
+    </dl>
+</form>
+</div>
