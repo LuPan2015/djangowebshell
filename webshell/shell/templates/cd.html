@@ -58,48 +58,50 @@ return false;
 }
 }
 </script>
+
+
 Current dir: 
 <form method="POST" action="{% url "cd"%}">
   {% csrf_token %}
-  <input type=text name=path value="{{ shell.directory }}">
+  <a href="{% url "uplink" shell.directory %}"><font color="red">Up</font></a>
+  <input type=text size=120 name=path value="{{ shell.directory }}">
   <input type="submit" value=Go>
 </form>
+<form method="POST" action="{% url "cd" shell.directory%}">
+	{% csrf_token %}
+  <select name="sort" size="5">
+  <option>default</option>
+  <option>by files</option>
+  <option>by folders</option>
+  <option>by folders name</option>
+  <option>by modify</option>
+</select><br/>
+<input type="submit" value="Sort">
+</form>
+
 <div class="wrapper_left">
 <ol>
-  <h2>Directories</h2>
-  {% if shell.directories %}
-  {% for directory in shell.directories %}
-    <li>
-  	  <div class="directories">
-  		<a href="{{full_path|add:"/"|add:directory}}">{{directory}}</a>
-  		<div class="actions">
-  		  <a href="{% url "remove_directory" shell.directory|add:"/"|add:directory%}" onClick="return confirmDelete();"> [Remove] </a>
-  	    </div>
-  	  </div>
-    </li>
-  {% endfor %}
-  {% else %}
-  <font color="red">This directory not has other directories</font>
-  {% endif %}  
-  <h2>Files</h2>
-  {% if shell.files %}
-  {% for file in shell.files %}
-    <li>
-  	  <div class="files">
-  	  	{% if file|length > 69 %}
-  	    {{file|slice:"0:70"|add:"..."}}
-  	    {% else %}
-  	    {{file}}
-  	    {% endif %}
-  		<div class="actions">
-  		  <a href="{% url "remove_file" shell.directory|add:"/"|add:file%}" onClick="return confirmDelete();"> [Remove] </a>
+{% if shell.all_files %}
+  {% for file in shell.all_files %}
+    {% if file in shell.files %}
+      <div class="files">
+        {{ file }}
+        <div class="actions">
+  		  <a href="{% url "remove" shell.directory|add:"/"|add:file%}" onClick="return confirmDelete();"> Remove </a>
   		</div>
-  	  </div>
-    </li>
+      </div>
+    {% else %}
+      <div class="directories">
+      	<a href="{% url "cd" shell.directory|add:"/"|add:file %}"> {{ file }} </a>
+      	<div class="actions">
+  		  <a href="{% url "remove" shell.directory|add:"/"|add:file%}" onClick="return confirmDelete();"> Remove </a>
+  		</div>
+      </div>
+    {% endif %}
   {% endfor %}
-  {% else %}
-  <font color="red">This directory not has any files</font>
-  {% endif %}
+{% else %}
+  empty
+{% endif %}
 </ol>
 </div>
 <div class="wrapper_right">

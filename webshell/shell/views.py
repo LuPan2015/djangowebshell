@@ -20,43 +20,59 @@ def cd(request, dirname=os.getcwd()):
 
     """
     url = request.get_full_path()
+    sort = 'default'
     if request.method == 'POST':
-        dirname = request.POST.get('path')
-        url = request.get_full_path() + dirname
+        sort = request.POST.get('sort', 'default')
+        if 'path' in request.POST:
+            dirname = request.POST.get('path')
+            url = request.get_full_path() + dirname
     if dirname == os.getcwd():
         url = request.get_full_path() + dirname
     directory, files, directories = backshell.list_dir(dirname) if type(backshell.list_dir(dirname)) == type(()) else ('Error!!',['come back'],['cant read the directory {0}'.format(dirname)])
+
+    if sort == 'default':
+        all_files = directories + files
+    elif sort == 'by files':
+        all_files = files + directories
+    elif sort == 'by folders':
+        all_files = directories + files
+    elif sort == 'by folders name':
+        all_files = directories + files
+    elif sort == 'by modify':
+        all_files = files + directories
+        all_files.sort(key=lambda x: os.path.getmtime(os.path.join(dirname, x)))
+        all_files.reverse()
     return render_to_response('cd.html',
-                              {'shell':{'directory': directory,
+                              {'shell':{'all_files': all_files,
+                               'directory': directory,
+                               'directories': directories,
                                'files': files,
-                               'directories': directories},
-                              'full_path': url
-                              },
-                              context_instance=RequestContext(request)
+                               'full_path': url}},
+                              context_instance=RequestContext(request),
                               )
 
 
-
-def remove_file(request, filename):
-    """Removes the file.
-
-    Keyword arguments:
-    filename (str)      --  the full path to file (default '')
-
-    """
-    status = backshell.remove_file(filename)
-    return redirect('cd', os.path.split(filename)[0])
-
-
-def remove_directory(request, dirname):
-    """Removes the directory.
+def uplink(request, dirname):
+    """Return a previous directory.
 
     Keyword arguments:
     dirname (str)       --  the full path to directory (default '')
 
     """
-    status = backshell.remove_dir(dirname)
     return redirect('cd', os.path.split(dirname)[0])
+
+def remove(request, filename):
+    """Removes the file or directory.
+
+    Keyword arguments:
+    filename (str)      --  the full path to the file (default '')
+
+    """
+    if os.path.isfile(filename):
+        status = backshell.remove_file(filename)
+    elif os.path.isdir(filename):
+        status = backshell.remove_dir(filename)
+    return redirect('cd', os.path.split(filename)[0])
 
 
 def new_file(request, dirname):
